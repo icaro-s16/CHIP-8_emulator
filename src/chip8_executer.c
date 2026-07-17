@@ -128,30 +128,19 @@ void execute_display_instruction(
         break;
     
     case 0xD:{
-        int x = decoded_opcode->vx % 64;
-        int y = decoded_opcode->vy % 32;
+        int x = decoded_opcode->vx % CHIP8_DISPLAY_WIDGHT;
+        int y = decoded_opcode->vy % CHIP8_DISPLAY_HEIGHT;
         vm->V[0xF] = 0;
-        for(int i = 0; i < decoded_opcode->constant; i++){
-            uint8_t sprite = vm->memory[vm->I + i];
-            for(int j = 7; j >= 0; j--){
-                if (x >= CHIP8_DISPLAY_WIDGHT - 1){
-                    break;
+        for(int row = 0; row < decoded_opcode->constant; row++){
+            byte sprite_byte = vm->memory[vm->I + row];
+            for(int col = 0; col < 8; col++){
+                byte *screen_pixel = &vm->display[(y + row) * CHIP8_DISPLAY_WIDGHT + (x + row)];
+                if ((sprite_byte & (1 << col)) ){
+                    if (*screen_pixel > 0)
+                        vm->V[0xF] = 1;
+                    *screen_pixel ^= 1;
                 }
-                if (
-                    ((sprite<<j) == 1) &&
-                    vm->display[y * CHIP8_DISPLAY_HEIGHT + x] == 1
-                ){
-                    vm->display[y * CHIP8_DISPLAY_HEIGHT + x] = 0;
-                    vm->V[0xF] = 1;
-                }
-                else if (
-                    ((sprite<<j) == 1)
-                ){
-                    vm->display[y * CHIP8_DISPLAY_HEIGHT + x] = 1;
-                }
-                x += 1;
             }
-            y +=1;
         }
         break;
     }

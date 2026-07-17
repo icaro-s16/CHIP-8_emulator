@@ -15,7 +15,13 @@ int main(){
         CU_cleanup_registry();
         return CU_get_error();
     }
+
+
+    /*
     
+    Adding tests from tests_chip8_decoder.c  
+    
+    */
     if (NULL == CU_add_test(pSuite, "test_decoder_set_register_op", test_decoder_set_register_op)) {
         CU_cleanup_registry();
         return CU_get_error();
@@ -33,10 +39,36 @@ int main(){
         return CU_get_error();
     }
     
+    /*
+    
+    Adding tests from tests_chip8_executer.c
+    
+    */
+    if (NULL == CU_add_test(pSuite, "test_execute_assig_instruction", test_execute_assig_instruction)) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "test_execute_bcd_instruction", test_execute_bcd_instruction)) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "test_execute_bitop_instruction", test_execute_bitop_instruction)) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "test_execute_cond_instruction", test_execute_cond_instruction)) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+    if (NULL == CU_add_test(pSuite, "test_execute_const_instruction", test_execute_const_instruction)) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+
+
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_suite(pSuite);
     
     CU_cleanup_registry();
-    
     return CU_get_error();
 }

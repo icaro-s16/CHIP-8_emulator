@@ -61,3 +61,4 @@ void test_decoder_function(){
         "GOTO 0x0FFF"
     );
 }
+

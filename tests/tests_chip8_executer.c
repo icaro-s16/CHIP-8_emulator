@@ -226,7 +226,14 @@ void test_execute_const_instruction(){
     CU_ASSERT_EQUAL(
         vm.V[decoded_opcode.vx],
         decoded_opcode.constant + 20
-    );
+    );    
+
+}
+
+
+void test_execute_display_instruction(){
+    Chip8VM vm = {0};
+    DecodedOpcode decoded_opcode = {0};
 
     for(int i = 0; i < CHIP8_DISPLAY_HEIGHT * CHIP8_DISPLAY_WIDGHT; i++)
         vm.display[i] = 1;
@@ -240,4 +247,10 @@ void test_execute_const_instruction(){
             0
         );
 
+    addr sprite[] = {0xF0, 0x90, 0x90, 0x90, 0xF0}; // 0 
+    for (int i = 0; i < 5; i++)
+        vm.memory[i] = sprite[i];
+    vm.I = 0;
+    decoded_opcode.vx = 0;
+    decoded_opcode.vy = 0; 
 }

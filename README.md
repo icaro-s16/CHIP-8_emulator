@@ -9,5 +9,6 @@
 Those are some references that i use to create my project, if you to do a CHIP-8 emulator too, see thoses articles em pages.
 
 - To understand how a CHIP-8 emulator works, see this [guide](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/).
-- To get a deeper understanding of the functionality of certain instructions and constraints regarding the CHIP-8, see the [wiki](https://en.wikipedia.org/wiki/CHIP-8)!
-- As a bonus, although it is not specifically about CHIP-8, it teaches you how to use CMake(it helped me a lot). Check out this [article](https://cliutils.gitlab.io/modern-cmake/).
+- To get a deeper understanding of the functionality of certain instructions, see the [wiki](https://en.wikipedia.org/wiki/CHIP-8)!
+- As a bonus, although it is not specifically about CHIP-8, this [article](https://cliutils.gitlab.io/modern-cmake/) teaches you how to use CMake (it helped me a lot).
+- This online (CHIP-8 emulator)[https://chipo.ber.gp/] shows the disassembly of a ROM, which helps me debug my code.

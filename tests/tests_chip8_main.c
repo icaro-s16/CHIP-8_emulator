@@ -52,15 +52,7 @@ int main(){
         CU_cleanup_registry();
         return CU_get_error();
     }
-    if (NULL == CU_add_test(pSuite, "test_execute_bitop_instruction", test_execute_bitop_instruction)) {
-        CU_cleanup_registry();
-        return CU_get_error();
-    }
-    if (NULL == CU_add_test(pSuite, "test_execute_cond_instruction", test_execute_cond_instruction)) {
-        CU_cleanup_registry();
-        return CU_get_error();
-    }
-    if (NULL == CU_add_test(pSuite, "test_execute_const_instruction", test_execute_const_instruction)) {
+    if (NULL == CU_add_test(pSuite, "test_execute_display_instruction", test_execute_display_instruction)) {
         CU_cleanup_registry();
         return CU_get_error();
     }

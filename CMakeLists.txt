@@ -7,6 +7,10 @@ project(
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE debug)
+endif()
+
 # To create a build for testing the CHIP-8 functions:
 # - Create a build directory or delete CMakeCache.txt
 # - Navigate to the build directory
@@ -41,6 +45,7 @@ set(SRC_FILES
     src/chip8_emulator.c
     src/chip8_executer.c
     src/chip8_interface.c
+    src/chip8_memory.c
 )
 
 set(LIB_NAME "chip8Lib")
@@ -49,12 +54,14 @@ add_library(${LIB_NAME} STATIC ${SRC_FILES})
 
 target_include_directories(${LIB_NAME} PUBLIC include)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC raylib)
+target_link_libraries(${LIB_NAME} PUBLIC raylib)
 
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fonts
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/roms 
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 if (NOT CHIP8_TEST)
     add_executable(${PROJECT_NAME} src/main.c)
@@ -65,6 +72,4 @@ else()
     target_link_libraries(${PROJECT_NAME} PUBLIC cunit)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${LIB_NAME})
-
-
+target_link_libraries(${PROJECT_NAME} PUBLIC ${LIB_NAME})

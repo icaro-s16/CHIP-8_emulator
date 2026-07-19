@@ -38,6 +38,6 @@ int chip8_press_key(Chip8VM* vm);
 
 void chip8_update_display(Chip8VM* vm);
 
-inline void chip8_construct_display();
+void chip8_construct_display();
 
-inline void chip8_destroy_display();
+void chip8_destroy_display();

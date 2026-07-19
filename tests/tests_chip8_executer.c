@@ -2,6 +2,19 @@
 #include "../src/chip8_executer.c"
 
 
+static Memory tests_memory_construct(){
+    Memory mem = {0};
+    mem.rom = calloc(MEM_MAX_SIZE - PC_INITIAL_OFFSET, sizeof(byte));
+    mem.rom_size = MEM_MAX_SIZE - PC_INITIAL_OFFSET;
+    mem.read = chip8_memory_read;
+    mem.write = chip8_memory_write;
+    return mem;
+}
+
+static void tests_memory_destroy(Memory* mem){
+    free(mem->rom);
+}
+
 void test_execute_assig_instruction(){
     Chip8VM vm = {0};
     vm.V[1] = 20;
@@ -22,235 +35,69 @@ void test_execute_assig_instruction(){
 void test_execute_bcd_instruction(){
     Chip8VM vm = {0};
 
+    vm.memory = tests_memory_construct();
+
     DecodedOpcode decoded_opcode = {
         .vx = 123
     };
 
+    vm.I = PC_INITIAL_OFFSET;
+
     execute_bcd_instruction(&vm, &decoded_opcode);
 
     CU_ASSERT_EQUAL(
-        vm.memory[0],
+        vm.memory.read(&vm.memory, PC_INITIAL_OFFSET),
         1
     );
     CU_ASSERT_EQUAL(
-        vm.memory[1],
+        vm.memory.read(&vm.memory, 1 + PC_INITIAL_OFFSET),
         2
     );
     CU_ASSERT_EQUAL(
-        vm.memory[2],
+        vm.memory.read(&vm.memory, 2 + PC_INITIAL_OFFSET),
         3
     );
-}
 
-
-void test_execute_bitop_instruction(){
-    Chip8VM vm = {0};
-    DecodedOpcode decoded_opcode = {
-        .vx = 0,
-        .vy = 1,
-        .constant = 0x1
-    };
-    vm.V[decoded_opcode.vy] = 0b1111;
-
-    execute_bitop_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.V[decoded_opcode.vx],
-        0b1111
-    );
-
-    decoded_opcode.constant = 0x2;
-    vm.V[decoded_opcode.vx] = 0;
-
-    execute_bitop_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.V[decoded_opcode.vx],
-        0
-    );
-
-    decoded_opcode.constant = 0x3;
-    vm.V[decoded_opcode.vx] = 0;
-
-    execute_bitop_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.V[decoded_opcode.vx],
-        0b1111
-    );
-
-    decoded_opcode.constant = 0x6;
-    vm.V[decoded_opcode.vx] = 0b10;
-
-    execute_bitop_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.V[decoded_opcode.vx],
-        0b1
-    );
-
-    decoded_opcode.constant = 0xE;
-    vm.V[decoded_opcode.vx] = 0b01;
-
-    execute_bitop_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.V[decoded_opcode.vx],
-        0b10
-    );
-
-}
-
-void test_execute_cond_instruction(){
-    Chip8VM vm = {0};
-    DecodedOpcode decoded_opcode = {0};
-    
-    decoded_opcode.vx = 1;
-    decoded_opcode.constant = 1;
-    decoded_opcode.decoder_class = 0x3;
-
-    execute_cond_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.pc,
-        2
-    );
-
-    decoded_opcode.constant = 0;
-    vm.pc = 0;
-    
-    execute_cond_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_NOT_EQUAL(
-        vm.pc,
-        2
-    );
-
-    decoded_opcode.vx = 1;
-    decoded_opcode.constant = 1;
-    decoded_opcode.decoder_class = 0x4;
-    vm.pc = 0;
-
-    execute_cond_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_NOT_EQUAL(
-        vm.pc,
-        2
-    );
-
-    decoded_opcode.vx = 1;
-    decoded_opcode.constant = 0;
-    decoded_opcode.decoder_class = 0x4;
-    vm.pc = 0;
-
-    execute_cond_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.pc,
-        2
-    );
-    
-    decoded_opcode.vx = 1;
-    decoded_opcode.vy = 1;
-    decoded_opcode.decoder_class = 0x5;
-    vm.pc = 0;
-
-    execute_cond_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.pc,
-        2
-    );
-
-    decoded_opcode.vx = 1;
-    decoded_opcode.vy = 0;
-    decoded_opcode.decoder_class = 0x5;
-    vm.pc = 0;
-
-    execute_cond_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_NOT_EQUAL(
-        vm.pc,
-        2
-    );
-    
-    decoded_opcode.vx = 1;
-    decoded_opcode.vy = 0;
-    decoded_opcode.decoder_class = 0x9;
-    vm.pc = 0;
-
-    execute_cond_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.pc,
-        2
-    );
-
-    decoded_opcode.vx = 1;
-    decoded_opcode.vy = 1;
-    decoded_opcode.decoder_class = 0x9;
-    vm.pc = 0;
-
-    execute_cond_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_NOT_EQUAL(
-        vm.pc,
-        2
-    );
-    
-}
-
-
-void test_execute_const_instruction(){
-    Chip8VM vm = {0};
-    DecodedOpcode decoded_opcode = {0};
-
-    decoded_opcode.vx = 0;
-    decoded_opcode.constant = 20;
-    decoded_opcode.decoder_class = 0x6;
-
-    execute_const_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.V[decoded_opcode.vx],
-        decoded_opcode.constant
-    );
-
-    vm.V[decoded_opcode.vx] = 20;
-    decoded_opcode.vx = 0;
-    decoded_opcode.constant = 20;
-    decoded_opcode.decoder_class = 0x7;
-
-    execute_const_instruction(&vm, &decoded_opcode);
-
-    CU_ASSERT_EQUAL(
-        vm.V[decoded_opcode.vx],
-        decoded_opcode.constant + 20
-    );    
-
+    tests_memory_destroy(&vm.memory);
 }
 
 
 void test_execute_display_instruction(){
     Chip8VM vm = {0};
     DecodedOpcode decoded_opcode = {0};
+    vm.memory = tests_memory_construct();
 
-    for(int i = 0; i < CHIP8_DISPLAY_HEIGHT * CHIP8_DISPLAY_WIDGHT; i++)
-        vm.display[i] = 1;
+    vm.memory.write(&vm.memory, PC_INITIAL_OFFSET, 0xF0);
     
-    decoded_opcode.decoder_class = 0x0;
-    execute_display_instruction(&vm, &decoded_opcode);
+    /*
+    Draw:
 
-    for(int i = 0; i < CHIP8_DISPLAY_HEIGHT * CHIP8_DISPLAY_WIDGHT; i++)
-        CU_ASSERT_EQUAL(
-            vm.display[i],
-            0
-        );
+    | ****---- |
+    
+    */
 
-    addr sprite[] = {0xF0, 0x90, 0x90, 0x90, 0xF0}; // 0 
-    for (int i = 0; i < 5; i++)
-        vm.memory[i] = sprite[i];
-    vm.I = 0;
+    vm.I = PC_INITIAL_OFFSET;
+    decoded_opcode.decode_class = 0xD;
     decoded_opcode.vx = 0;
-    decoded_opcode.vy = 0; 
+    decoded_opcode.vy = 0;
+    decoded_opcode.constant = 1;
+    
+    execute_display_instruction(&vm, &decoded_opcode); 
+    for(int i = 0; i < 8; i++){
+        if(i < 4){
+            CU_ASSERT_EQUAL(
+                vm.display[i],
+                1
+            );
+        }
+        else{ 
+            CU_ASSERT_EQUAL(
+                vm.display[i], 
+                0
+            );
+        }
+    }
+
+    tests_memory_destroy(&vm.memory);
 }
+

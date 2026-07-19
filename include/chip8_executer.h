@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory.h>
 #include "chip8_structures.h"
 #include "chip8_interface.h"
 

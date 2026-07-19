@@ -1,5 +1,7 @@
 #include "chip8_interface.h"
 
+// TODO: Refac this file
+
 static void chip8_draw_hardware_components(
     const Vector2 pos, 
     const char* name, 
@@ -69,7 +71,7 @@ static void chip8_draw_display_area(
                 chip8_pixel.y + i * chip8_pixel.height,
                 chip8_pixel.width,
                 chip8_pixel.height,
-                (vm->display[j + (i * CHIP8_DISPLAY_HEIGHT)] == 0)? BLACK : GREEN
+                (vm->display[i][j]) ? GREEN : BLACK
             );
 
     DrawRectangleLinesEx(
@@ -91,7 +93,8 @@ static void chip8_draw_hardware_components_area(
         312,
         364
     };
-    
+
+  
     DrawTextEx(
             font,
             "Registers | Stack",
@@ -268,25 +271,31 @@ static void chip8_draw_memory_area(
         2,
         GREEN
     );
+    
+    int mem_offset = (vm->pc - PC_INITIAL_OFFSET)/2;
+    
+    if (mem_offset > vm->memory.rom_size/2 - 14){
+        mem_offset = vm->memory.rom_size/2 - 14;
+    }
 
-
-    int y_offset = 0;
-    int instruction_offset = vm->pc - PC_INITIAL_OFFSET;
-    int memory_offset = ( vm->pc < 4096 - 28 )? vm->pc : 4096 - 28;
-    for (int i = ( vm->pc < MEM_SIZE - 28 )? vm->pc : MEM_SIZE - 28; i < 28 + memory_offset; i += 2){
+    for (int text_offset = 0; 
+        text_offset < 14; 
+        mem_offset ++, text_offset++
+    ){
         chip8_draw_memory_line(
             (Vector2){
                 memory_box.x + 10,
-                memory_box.y + 10 + (y_offset++) * 19
+                memory_box.y + 10 +(text_offset) * 19
             },
-            vm->instructions_alias[instruction_offset],
-            TextFormat("0x%.4X", vm->memory[i] << 8 | vm->memory[i + 1]),
+            vm->dissasembly[mem_offset],
+            TextFormat(
+                "0x%.4X", (mem_offset + PC_INITIAL_OFFSET)*2
+            ),
             100,
             GREEN,
-            16,
+            12,
             2
         );
-        instruction_offset += 1;
     }
 
     DrawRectangleLinesEx(
@@ -387,12 +396,13 @@ void chip8_update_display(
     EndDrawing();
 }
 
-inline void chip8_construct_display(){
+void chip8_construct_display(){
+    SetTraceLogLevel(LOG_ERROR); 
     InitWindow(DISPLAY_WIDHT, DISPLAY_HEIGHT, "CHIP-8 emulator");
     font = LoadFont("fonts/liner BMP14.TTF");
     SetTargetFPS(60);
 }
 
-inline void chip8_destroy_display(){
+void chip8_destroy_display(){
     CloseWindow();
 }

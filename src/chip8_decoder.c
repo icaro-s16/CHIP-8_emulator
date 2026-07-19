@@ -1,219 +1,280 @@
 #include "chip8_decoder.h"
 
 
-static inline void decoder_set_address_op(const addr* opcode, DecodedOpcode* decoded_opcode){
-    decoded_opcode->address = *opcode & 0x0FFF;
-}
+void decode_class_0(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
+    byte cur_id = *opcode & 0x00FF;
 
-static inline void decoder_set_register_op(const addr* opcode, DecodedOpcode* decoded_opcode){
-    decoded_opcode->vx = (*opcode & 0x0F00) >> 8;
-    decoded_opcode->constant = *opcode & 0x00FF;
-}
-
-static inline void decoder_set_doubleregister_op(const addr* opcode, DecodedOpcode* decoded_opcode){
-    decoded_opcode->vx = (*opcode & 0x0F00) >> 8;
-    decoded_opcode->vy = (*opcode & 0x00F0) >> 4;
-    decoded_opcode->constant = *opcode & 0x000F;
-}
-
-
-void decoder_class_0(const addr* opcode, DecodedOpcode* decoded_opcode){
-    byte instruction_id = *opcode & 0x00FF;
-
-    switch(instruction_id)
+    switch(cur_id)
     {
     case 0xEE:
         decoded_opcode->execute = execute_flow_instruction;
-        sprintf(decoded_opcode->instruction_alias, "RET");
+        sprintf(decoded_opcode->mnemonic, "RTS");
         break;
     case 0xE0:
         decoded_opcode->execute = execute_display_instruction;
-        sprintf(decoded_opcode->instruction_alias, "CLR");
+        sprintf(decoded_opcode->mnemonic, "CLS");
         break;
     default:
         decoded_opcode->execute = execute_call_instruction;
         decoder_set_address_op(opcode, decoded_opcode);
-        sprintf(decoded_opcode->instruction_alias, "CALL");
+        sprintf(decoded_opcode->mnemonic, "CALL");
         break;
     }
     
 }
 
-void decoder_class_1(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_1(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_flow_instruction;
     decoder_set_address_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "GOTO 0x%.4X", decoded_opcode->address);
+    sprintf(decoded_opcode->mnemonic, "JMP 0x%.3X", decoded_opcode->address);
 }
 
-void decoder_class_2(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_2(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_flow_instruction;
     decoder_set_address_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "CALL 0x%.4X", decoded_opcode->address);
+    sprintf(decoded_opcode->mnemonic, "JSR 0x%.3X", decoded_opcode->address);
 }
 
-void decoder_class_3(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_3(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_cond_instruction;
     decoder_set_register_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "JE V%.1X, 0x%.2X", decoded_opcode->vx, decoded_opcode->constant);
+    sprintf(decoded_opcode->mnemonic, "SKEQ V%.1X, 0x%.2X", decoded_opcode->vx, decoded_opcode->constant);
 }
 
-void decoder_class_4(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_4(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_cond_instruction;
     decoder_set_register_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "JNE V%.1X, 0x%.2X", decoded_opcode->vx, decoded_opcode->constant);
+    sprintf(decoded_opcode->mnemonic, "SKNE V%.1X, 0x%.2X", decoded_opcode->vx, decoded_opcode->constant);
 }
 
-void decoder_class_5(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_5(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_cond_instruction;
     decoder_set_doubleregister_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "JE V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
+    sprintf(decoded_opcode->mnemonic, "SKEQ V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
 }
 
-void decoder_class_6(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_6(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_const_instruction;
     decoder_set_register_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "MOV V%.1X, 0x%.2X", decoded_opcode->vx, decoded_opcode->constant);
+    sprintf(decoded_opcode->mnemonic, "MOV V%.1X, 0x%.2X", decoded_opcode->vx, decoded_opcode->constant);
 }
 
-void decoder_class_7(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_7(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_const_instruction;
     decoder_set_register_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "ADD V%.1X, 0x%.2X", decoded_opcode->vx, decoded_opcode->constant);
+    sprintf(decoded_opcode->mnemonic, "ADD V%.1X, 0x%.2X", decoded_opcode->vx, decoded_opcode->constant);
 }
 
-void decoder_class_8(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_8(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
+    byte cur_id = *opcode & 0x000F; 
+
+
     decoder_set_doubleregister_op(opcode, decoded_opcode);  
-    byte instruction_identifier = *opcode & 0x000F; 
     
-    if (instruction_identifier == 0x0 ){
+    
+    if (cur_id == 0x0 ){
         decoded_opcode->execute = execute_assig_instruction;
-        sprintf(decoded_opcode->instruction_alias, "MOV V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
-
     }
     else if (
-        instruction_identifier <= 0x3 || 
-        instruction_identifier == 0x6 ||
-        instruction_identifier == 0xE 
+        cur_id <= 0x3 || 
+        cur_id == 0x6 ||
+        cur_id == 0xE 
     ){
         decoded_opcode->execute = execute_bitop_instruction;
-        if (instruction_identifier  == 0x1) 
-            sprintf(decoded_opcode->instruction_alias, "OR V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
-        if (instruction_identifier  == 0x2)
-            sprintf(decoded_opcode->instruction_alias, "AND V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
-        if (instruction_identifier  == 0x3)
-            sprintf(decoded_opcode->instruction_alias, "XOR V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
-        if (instruction_identifier == 0x6)
-            sprintf(decoded_opcode->instruction_alias, "SHR V%.1X, 1", decoded_opcode->vx);    
-        if (instruction_identifier == 0xE)
-            sprintf(decoded_opcode->instruction_alias, "SHE V%.1X, 1", decoded_opcode->vx);
-
     }
     else{
         decoded_opcode->execute = execute_math_instruction;
-        if (instruction_identifier  == 0x4) 
-            sprintf(decoded_opcode->instruction_alias, "ADD V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
-        if (instruction_identifier  == 0x5) 
-            sprintf(decoded_opcode->instruction_alias, "SUB V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
-        else
-            sprintf(decoded_opcode->instruction_alias, "RSUB V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
+    }
 
+    switch (cur_id)
+    {
+    case 0x0:
+        sprintf(decoded_opcode->mnemonic, "MOV V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
+        break;
+    case 0x1:
+        sprintf(decoded_opcode->mnemonic, "OR V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
+        break;
+    case 0x2:
+        sprintf(decoded_opcode->mnemonic, "AND V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
+        break;
+    case 0x3:
+        sprintf(decoded_opcode->mnemonic, "XOR V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
+        break;
+    case 0x4:
+        sprintf(decoded_opcode->mnemonic, "ADD V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
+        break;
+    case 0x5:
+        sprintf(decoded_opcode->mnemonic, "SUB V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
+        break;
+    case 0x6:
+        sprintf(decoded_opcode->mnemonic, "SHR V%.1X, 1", decoded_opcode->vx);
+        break;
+    case 0x7:
+        sprintf(decoded_opcode->mnemonic, "RSB V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
+        break;
+    case 0xE:
+        sprintf(decoded_opcode->mnemonic, "SHL V%.1X, 1", decoded_opcode->vx);
+        break;
+    default:
+        sprintf(decoded_opcode->mnemonic, "RAW 0x%.4X", opcode);
+        break;
     }
 }
 
-void decoder_class_9(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_9(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_cond_instruction;
     decoder_set_doubleregister_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "JNE V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
+    sprintf(decoded_opcode->mnemonic, "SKNE V%.1X, V%.1X", decoded_opcode->vx, decoded_opcode->vy);
 }
 
-void decoder_class_A(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_A(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_mem_instruction;
     decoder_set_address_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "MOV I, 0x%.4X", decoded_opcode->address);
+    sprintf(decoded_opcode->mnemonic, "MVI 0x%.3X", decoded_opcode->address);
 }
 
-void decoder_class_B(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_B(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_flow_instruction;
     decoder_set_address_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "MOV PC, V0 + 0x%.4X", decoded_opcode->address);
+    sprintf(decoded_opcode->mnemonic, "JMI 0x%.3X", decoded_opcode->address);
 }
 
-void decoder_class_C(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_C(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_rand_instruction;
     decoder_set_register_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "RAND V%.1X, 0x%.2X", decoded_opcode->vx, decoded_opcode->constant);
+    sprintf(decoded_opcode->mnemonic, "RAND V%.1X, 0x%.3X", decoded_opcode->vx, decoded_opcode->constant);
 }
 
-void decoder_class_D(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_D(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_display_instruction;
     decoder_set_doubleregister_op(opcode, decoded_opcode);
-    sprintf(decoded_opcode->instruction_alias, "DRW V%.1X, V%.1X, 0x%.1X", decoded_opcode->vx, decoded_opcode->vy, decoded_opcode->constant);
+    sprintf(decoded_opcode->mnemonic, "SPRITE V%.1X, V%.1X, 0x%.2X", decoded_opcode->vx, decoded_opcode->vy, decoded_opcode->constant);
 }
 
-void decoder_class_E(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_E(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoded_opcode->execute = execute_keyop_instruction;
     decoder_set_register_op(opcode, decoded_opcode);
     if (decoded_opcode->constant == 0x9E)
-        sprintf(decoded_opcode->instruction_alias, "JE V%.1X, KEY", decoded_opcode->vx);
+        sprintf(decoded_opcode->mnemonic, "SKPR V%.1X", decoded_opcode->vx);
     else
-        sprintf(decoded_opcode->instruction_alias, "JNE V%.1X, KEY", decoded_opcode->vx);
+        sprintf(decoded_opcode->mnemonic, "SKUP V%.1X", decoded_opcode->vx);
 }
 
-void decoder_class_F(const addr* opcode, DecodedOpcode* decoded_opcode){
+void decode_class_F(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
     decoder_set_register_op(opcode, decoded_opcode);
-    byte instruction_identifier = *opcode & 0x00FF; 
+    byte cur_id = *opcode & 0x00FF; 
 
-    switch (instruction_identifier)
+    switch (cur_id)
     {
     case 0x0A:
-        sprintf(decoded_opcode->instruction_alias, "MOV V%.1X, KEY", decoded_opcode->vx);
+        sprintf(decoded_opcode->mnemonic, "KEY V%.1X", decoded_opcode->vx);
         decoded_opcode->execute = execute_timer_instruction;
         break;
     
     case 0x18:
-        sprintf(decoded_opcode->instruction_alias, "MOV ST, V%.1X", decoded_opcode->vx);
+        sprintf(decoded_opcode->mnemonic, "SSOUND V%.1X", decoded_opcode->vx);
         decoded_opcode->execute = execute_sound_instruction;
         break;
     case 0x07:
-        sprintf(decoded_opcode->instruction_alias, "MOV V%.1X, DT", decoded_opcode->vx);
+        sprintf(decoded_opcode->mnemonic, "GDELAY V%.1X, DT", decoded_opcode->vx);
         decoded_opcode->execute = execute_timer_instruction;
         break;
     case 0x33:
-        sprintf(decoded_opcode->instruction_alias, "BCD V%.1X", decoded_opcode->vx);
+        sprintf(decoded_opcode->mnemonic, "BCD V%.1X", decoded_opcode->vx);
         decoded_opcode->execute = execute_bcd_instruction;
         break;
-    
     default:
-        if (instruction_identifier == 0x1E)
-            sprintf(decoded_opcode->instruction_alias, "ADD I, V%.1X", decoded_opcode->vx);
-        if (instruction_identifier == 0x1E)
-            sprintf(decoded_opcode->instruction_alias, "MEMDUMP V%.1X", decoded_opcode->vx);
-        if (instruction_identifier == 0x1E)
-            sprintf(decoded_opcode->instruction_alias, "MEMLOAD V%.1X", decoded_opcode->vx);
-        else
-            sprintf(decoded_opcode->instruction_alias, "MOV I, V%.1X", decoded_opcode->vx);
+        if (cur_id == 0x1E)
+            sprintf(decoded_opcode->mnemonic, "ADDI V%.1X", decoded_opcode->vx);
+        else if (cur_id == 0x55)
+            sprintf(decoded_opcode->mnemonic, "STR V0-V%.1X", decoded_opcode->vx);
+        else if (cur_id == 0x65)
+            sprintf(decoded_opcode->mnemonic, "LDR V0-V%.1X", decoded_opcode->vx);
+        else if (cur_id == 0x29)
+            sprintf(decoded_opcode->mnemonic, "FONT V%.1X", decoded_opcode->vx);
+        else{
+            sprintf(decoded_opcode->mnemonic, "RAW 0x%.4X", opcode);
+        }
         decoded_opcode->execute = execute_mem_instruction;
         break;
     }
 }
 
-const void** chip8_decoder_dispatcher(){
+static void decoder_default_err(){
+    fprintf(stderr, "ERROR: Unknown opcode..");
+    exit(1);
+}
+
+static void decoder_set_address_op(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
+    decoded_opcode->address = *opcode & 0x0FFF;
+}
+
+static void decoder_set_register_op(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
+    decoded_opcode->vx = (*opcode & 0x0F00) >> 8;
+    decoded_opcode->constant = *opcode & 0x00FF;
+}
+
+static void decoder_set_doubleregister_op(const addr* opcode, DecodedOpcode* decoded_opcode){
+    assert(opcode != NULL);
+    assert(decoded_opcode != NULL);
+    decoded_opcode->vx = (*opcode & 0x0F00) >> 8;
+    decoded_opcode->vy = (*opcode & 0x00F0) >> 4;
+    decoded_opcode->constant = *opcode & 0x000F;
+}
+
+void** chip8_decoder_dispatcher(){
     void (**dispatcher)(const addr*, DecodedOpcode*) = calloc(16, sizeof(void*));
-    dispatcher[0] = decoder_class_0;
-    dispatcher[1] = decoder_class_1;
-    dispatcher[2] = decoder_class_2;
-    dispatcher[3] = decoder_class_3;
-    dispatcher[4] = decoder_class_4;
-    dispatcher[5] = decoder_class_5;
-    dispatcher[6] = decoder_class_6;
-    dispatcher[7] = decoder_class_7;
-    dispatcher[8] = decoder_class_8;
-    dispatcher[9] = decoder_class_9;
-    dispatcher[10] = decoder_class_A;
-    dispatcher[11] = decoder_class_B;
-    dispatcher[12] = decoder_class_C;
-    dispatcher[13] = decoder_class_D;
-    dispatcher[14] = decoder_class_E;
-    dispatcher[15] = decoder_class_F;
-    return (const void**)dispatcher;
+    dispatcher[0] = decode_class_0;
+    dispatcher[1] = decode_class_1;
+    dispatcher[2] = decode_class_2;
+    dispatcher[3] = decode_class_3;
+    dispatcher[4] = decode_class_4;
+    dispatcher[5] = decode_class_5;
+    dispatcher[6] = decode_class_6;
+    dispatcher[7] = decode_class_7;
+    dispatcher[8] = decode_class_8;
+    dispatcher[9] = decode_class_9;
+    dispatcher[10] = decode_class_A;
+    dispatcher[11] = decode_class_B;
+    dispatcher[12] = decode_class_C;
+    dispatcher[13] = decode_class_D;
+    dispatcher[14] = decode_class_E;
+    dispatcher[15] = decode_class_F;
+    return (void**)dispatcher;
 }

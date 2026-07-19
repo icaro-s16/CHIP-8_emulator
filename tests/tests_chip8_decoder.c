@@ -50,14 +50,14 @@ void test_decoder_set_doubleregister_op(){
 void test_decoder_function(){
     DecodedOpcode opcode;
     addr instruction_addr = 0x0FFF;
-    decoder_class_1(&instruction_addr, &opcode);
+    decode_class_1(&instruction_addr, &opcode);
 
     CU_ASSERT_EQUAL(
         opcode.address,
         0x0FFF
     );
     CU_ASSERT_STRING_EQUAL(
-        opcode.instruction_alias,
+        opcode.mnemonic,
         "GOTO 0x0FFF"
     );
 }

@@ -2,19 +2,6 @@
 #include "../src/chip8_executer.c"
 
 
-static Memory tests_memory_construct(){
-    Memory mem = {0};
-    mem.rom = calloc(MEM_MAX_SIZE - PC_INITIAL_OFFSET, sizeof(byte));
-    mem.rom_size = MEM_MAX_SIZE - PC_INITIAL_OFFSET;
-    mem.read = chip8_memory_read;
-    mem.write = chip8_memory_write;
-    return mem;
-}
-
-static void tests_memory_destroy(Memory* mem){
-    free(mem->rom);
-}
-
 void test_execute_assig_instruction(){
     Chip8VM vm = {0};
     vm.V[1] = 20;
@@ -34,8 +21,6 @@ void test_execute_assig_instruction(){
 
 void test_execute_bcd_instruction(){
     Chip8VM vm = {0};
-
-    vm.memory = tests_memory_construct();
 
     DecodedOpcode decoded_opcode = {
         .vx = 123
@@ -65,19 +50,9 @@ void test_execute_bcd_instruction(){
 void test_execute_display_instruction(){
     Chip8VM vm = {0};
     DecodedOpcode decoded_opcode = {0};
-    vm.memory = tests_memory_construct();
 
     vm.memory.write(&vm.memory, PC_INITIAL_OFFSET, 0xF0);
-    
-    /*
-    Draw:
-
-    | ****---- |
-    
-    */
-
     vm.I = PC_INITIAL_OFFSET;
-    decoded_opcode.decode_class = 0xD;
     decoded_opcode.vx = 0;
     decoded_opcode.vy = 0;
     decoded_opcode.constant = 1;

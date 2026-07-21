@@ -1,12 +1,14 @@
 #pragma once
 
 #include "raylib.h"
-#include "chip8_structures.h"
+#include "chip8_core.h"
 
 static Font font;
-static const int DISPLAY_WIDHT  = 1280;
-static const int DISPLAY_HEIGHT = 720;
 
+static enum{ 
+    DISPLAY_WIDHT  = 1280,
+    DISPLAY_HEIGHT = 720
+};
 
 static void chip8_draw_hardware_components(
     const Vector2 pos, 

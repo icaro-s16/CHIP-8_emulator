@@ -22,24 +22,15 @@ static void chip8_load_rom(
         exit(1);
     }
 
-    mem->rom = calloc(mem->rom_size, sizeof(byte));
-
     fseek(rom, 0, SEEK_SET);
     fread(
-        mem->rom,  
+        &mem->mem[PC_INITIAL_OFFSET],  
         mem->rom_size, 
         sizeof(byte),
         rom
     );
-
+    
     fclose(rom);
-}
-
-void chip8_memory_destroy(
-    Memory* mem
-){
-    assert(mem != NULL);
-    free(mem->rom);
 }
 
 Memory chip8_memory_construct(
@@ -47,26 +38,29 @@ Memory chip8_memory_construct(
 ){
     assert(rom_name != NULL);
 
-    Memory mem = {
-        .fontset = {
-            0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-            0x20, 0x60, 0x20, 0x20, 0x70, // 1
-            0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-            0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-            0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-            0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-            0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-            0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-            0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-            0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-            0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-            0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-            0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-            0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-            0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-            0xF0, 0x80, 0xF0, 0x80, 0x80  // F
-        }
+    const byte fontset[] = {
+        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+        0x20, 0x60, 0x20, 0x20, 0x70, // 1
+        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
+
+    Memory mem;
+
+    for(int i = FONTSET_INITIAL_OFFSET; i < sizeof(fontset); i++)
+        mem.mem[i] = fontset[i - FONTSET_INITIAL_OFFSET];
 
     chip8_load_rom(&mem, rom_name);
 
@@ -81,15 +75,11 @@ byte chip8_memory_read(
     const addr address
 ){
     assert(mem != NULL);
-    assert(address < mem->rom_size + PC_INITIAL_OFFSET);
-
-    if (
-        address >= FONTSET_INITIAL_OFFSET && 
-        address < FONTSET_INITIAL_OFFSET + sizeof(mem->fontset)
-    )
-        return mem->fontset[address - FONTSET_INITIAL_OFFSET];
-    
-    return mem->rom[address - PC_INITIAL_OFFSET];
+    if ( address >= MEM_MAX_SIZE ){
+        fprintf(stderr, "ERROR: The address %ld is greater than the memory limit..\n");
+        exit(1);
+    }
+    return mem->mem[address];
 }
 
 void chip8_memory_write(
@@ -98,17 +88,11 @@ void chip8_memory_write(
     const byte bt
 ){
     assert(mem != NULL);
-    assert(address < mem->rom_size + PC_INITIAL_OFFSET);
-
-    if (
-        address >= FONTSET_INITIAL_OFFSET && 
-        address < FONTSET_INITIAL_OFFSET + sizeof(mem->fontset)
-    ){
-        mem->fontset[address - FONTSET_INITIAL_OFFSET] = bt;
-        return;
+    if ( address >= MEM_MAX_SIZE ){
+        fprintf(stderr, "ERROR: The address %ld is greater than the memory limit..\n");
+        exit(1);
     }
-
-    mem->rom[address - PC_INITIAL_OFFSET] = bt;
+    mem->mem[address] = bt;
 }
 
 

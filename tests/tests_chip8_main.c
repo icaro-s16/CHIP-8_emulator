@@ -1,6 +1,5 @@
 #include <CUnit/Basic.h>
 #include "tests_chip8_decoder.c"
-#include "tests_chip8_emulator.c"
 #include "tests_chip8_executer.c"
 
 

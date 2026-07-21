@@ -243,7 +243,7 @@ static void chip8_draw_memory_line(
         font,
         instruction,
         (Vector2){
-            pos.x + spacing + 25,
+            pos.x + spacing + 33,
             pos.y
         },
         font_size,
@@ -285,13 +285,13 @@ static void chip8_draw_memory_area(
         chip8_draw_memory_line(
             (Vector2){
                 memory_box.x + 10,
-                memory_box.y + 10 +(text_offset) * 19
+                memory_box.y + 12 +(text_offset) * 19
             },
             vm->dissasembly[mem_offset],
             TextFormat(
                 "0x%.4X", (mem_offset + PC_INITIAL_OFFSET)*2
             ),
-            100,
+            75,
             GREEN,
             12,
             2
@@ -309,7 +309,7 @@ static void chip8_draw_memory_area(
 int chip8_press_key(
     Chip8VM* vm
 ){
-    if (IsKeyDown(KEY_KP_1)){
+    if (IsKeyPressed(KEY_KP_1)){
         vm->keys[0] = 1;
         return 1;
     }
@@ -399,7 +399,7 @@ void chip8_update_display(
 void chip8_construct_display(){
     SetTraceLogLevel(LOG_ERROR); 
     InitWindow(DISPLAY_WIDHT, DISPLAY_HEIGHT, "CHIP-8 emulator");
-    font = LoadFont("fonts/liner BMP14.TTF");
+    font = LoadFont("assets/fonts/liner BMP14.TTF");
     SetTargetFPS(60);
 }
 

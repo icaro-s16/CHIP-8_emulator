@@ -19,9 +19,9 @@ static Chip8VM chip8_vm_construct(const char* rom_name);
 
 static void chip8_vm_destroy(Chip8VM* vm);
 
-static void chip8_emulate_cycle(Chip8VM* vm, void (*opcode_class_dispatcher[16])(const addr, DecodedOpcode*));
+static void chip8_emulate_cycle(Chip8VM* vm);
 
-static char** chip8_dissasembler_construct(Memory* mem, void (*opcode_class_dispatcher[16])(const addr, DecodedOpcode*));
+static char** chip8_dissasembler_construct(Memory* mem);
 
 static void chip8_dissasembler_destroy(Chip8VM* vm);
 

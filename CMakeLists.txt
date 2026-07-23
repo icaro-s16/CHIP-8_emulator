@@ -43,7 +43,7 @@ FetchContent_MakeAvailable(raylib)
 set(SRC_FILES
     src/chip8_decoder.c
     src/chip8_emulator.c
-    src/chip8_executer.c
+    src/chip8_executor.c
     src/chip8_interface.c
     src/chip8_memory.c
     src/chip8_core.c

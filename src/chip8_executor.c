@@ -1,4 +1,4 @@
-#include "chip8_executer.h"
+#include "chip8_executor.h"
 
 
 void execute_mov_rr(

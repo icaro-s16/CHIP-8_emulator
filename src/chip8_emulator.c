@@ -39,9 +39,8 @@ void chip8_emulator_run(
         
     Chip8VM vm = chip8_vm_construct(rom_name);  
 
-    void (**decoder_dispatcher)(const addr, DecodedOpcode *) = (void (**)(const addr , DecodedOpcode *))chip8_decoder_dispatcher();
 
-    vm.dissasembly = chip8_dissasembler_construct(&vm.memory, decoder_dispatcher);
+    vm.dissasembly = chip8_dissasembler_construct(&vm.memory);
     
     chip8_construct_display();
 
@@ -50,7 +49,7 @@ void chip8_emulator_run(
     clock_gettime(CLOCK_MONOTONIC, &last);
     
     while(!WindowShouldClose()){
-        chip8_emulate_cycle(&vm, decoder_dispatcher);
+        chip8_emulate_cycle(&vm);
         
         struct timespec now = {0};
         clock_gettime(CLOCK_MONOTONIC, &now);
@@ -62,17 +61,14 @@ void chip8_emulator_run(
         last = now;
     }
 
-    free(decoder_dispatcher);
     chip8_destroy_display();
     chip8_vm_destroy(&vm);
 }
 
 static char** chip8_dissasembler_construct(
-    Memory* mem, 
-    void (**decoder_dispatcher)(const addr, DecodedOpcode*)
+    Memory* mem
 ){  
     assert(mem != NULL);
-    assert(decoder_dispatcher != NULL);
 
     printf("ASSEMBLY:\n");
 
@@ -90,12 +86,12 @@ static char** chip8_dissasembler_construct(
             mem->read(mem, pc + 1)
         );
 
-        byte opcode_class = (opcode & 0xF000) >> 12;
-        void(*opcode_decoder)(const addr, DecodedOpcode*) = decoder_dispatcher[opcode_class];
-        assert(opcode_decoder != NULL);
-
         DecodedOpcode decoded_opcode = {0};
         decoded_opcode.optype= chip8_get_optype(opcode);
+        void (*opcode_decoder)(const addr, DecodedOpcode*) = chip8_get_decoder(&decoded_opcode); 
+
+        assert(opcode_decoder != NULL);
+
         opcode_decoder(opcode, &decoded_opcode);
         
         printf("%s\n", decoded_opcode.mnemonic);
@@ -121,11 +117,9 @@ static void chip8_dissasembler_destroy(
 }
 
 static void chip8_emulate_cycle(
-    Chip8VM* vm, 
-    void (*decoder_dispatcher[16])(const addr, DecodedOpcode*)
+    Chip8VM* vm
 ){
     assert(vm != NULL);
-    assert(decoder_dispatcher != NULL);
     
     addr opcode = (
         (vm->memory.read(&vm->memory, vm->pc) << 8) | 
@@ -134,13 +128,10 @@ static void chip8_emulate_cycle(
     
     vm->pc += 2;
 
-    byte opcode_class = (opcode & 0xF000) >> 12;
-    void(*opcode_decoder)(const addr, DecodedOpcode*) = decoder_dispatcher[opcode_class];
-
     DecodedOpcode decoded_opcode = {0};
     decoded_opcode.optype = chip8_get_optype(opcode);
     chip8_set_executer(&decoded_opcode);
-
+    void (*opcode_decoder)(const addr, DecodedOpcode*) = chip8_get_decoder(&decoded_opcode); 
     opcode_decoder(opcode, &decoded_opcode);
     decoded_opcode.execute(vm, &decoded_opcode);
 

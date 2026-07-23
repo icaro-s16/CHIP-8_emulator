@@ -28,7 +28,7 @@ Instruction type | Opcode | Executor | Decoder
     X(ADD_RC, 0x7FFF, execute_add_rc, decode_add_rc)                \
     X(MOV_RR, 0x8FF0, execute_mov_rr, decode_mov_rr)                \
     X(OR_RR, 0x8FF1, execute_or_rr, decode_or_rr)                   \
-    X(AND_RR, 0x8FF2, execute_and_rr, decode_add_rr)                \
+    X(AND_RR, 0x8FF2, execute_and_rr, decode_and_rr)                \
     X(XOR_RR, 0x8FF3, execute_xor_rr, decode_xor_rr)                \
     X(ADD_RR, 0x8FF4, execute_add_rr, decode_add_rr)                \
     X(SUB_RR, 0x8FF5, execute_sub_rr, decode_sub_rr)                \

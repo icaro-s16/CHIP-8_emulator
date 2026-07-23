@@ -24,9 +24,9 @@ void execute_bcd(
     if (decoded_opcode->optype != BCD)
         execute_err(decoded_opcode);
 
-    vm->memory.write(&vm->memory, vm->I, decoded_opcode->vx / 100);
-    vm->memory.write(&vm->memory, vm->I + 1, (decoded_opcode->vx / 10) % 10);
-    vm->memory.write(&vm->memory, vm->I + 2, decoded_opcode->vx % 10);
+    vm->memory.write(&vm->memory, vm->I, vm->V[decoded_opcode->vx] / 100);
+    vm->memory.write(&vm->memory, vm->I + 1, (vm->V[decoded_opcode->vx] / 10) % 10);
+    vm->memory.write(&vm->memory, vm->I + 2, vm->V[decoded_opcode->vx] % 10);
 }
 
 void execute_or_rr(
@@ -89,7 +89,7 @@ void execute_shl(
     assert(vm != NULL);
     assert(decoded_opcode != NULL);
 
-    if (decoded_opcode->optype !=  SHR)
+    if (decoded_opcode->optype !=  SHL)
         execute_err(decoded_opcode);
 
     vm->V[0xF] = vm->V[decoded_opcode->vx] & 0x80u;
@@ -116,7 +116,7 @@ void execute_skeq_rc(
     if (decoded_opcode->optype !=  SKEQ_RC)
         execute_err(decoded_opcode);
 
-    if (decoded_opcode->vx == decoded_opcode->constant)
+    if (vm->V[decoded_opcode->vx] == decoded_opcode->constant)
         vm->pc += 2;
 }
 
@@ -130,7 +130,7 @@ void execute_skne_rc(
     if (decoded_opcode->optype !=  SKNE_RC)
         execute_err(decoded_opcode);
 
-    if (decoded_opcode->vx != decoded_opcode->constant)
+    if (vm->V[decoded_opcode->vx] != decoded_opcode->constant)
         vm->pc += 2;
 }
 
@@ -144,7 +144,7 @@ void execute_skeq_rr(
     if (decoded_opcode->optype !=  SKEQ_RR)
         execute_err(decoded_opcode);
 
-    if (decoded_opcode->vx == decoded_opcode->vy)
+    if (vm->V[decoded_opcode->vx] == vm->V[decoded_opcode->vy])
         vm->pc += 2;
 }
 
@@ -158,7 +158,7 @@ void execute_skne_rr(
     if (decoded_opcode->optype !=  SKNE_RR)
         execute_err(decoded_opcode);
 
-    if (decoded_opcode->vx != decoded_opcode->vy)
+    if (vm->V[decoded_opcode->vx] != vm->V[decoded_opcode->vy])
         vm->pc += 2;
 }
 
@@ -347,7 +347,7 @@ void execute_addi(
     if (decoded_opcode->optype !=  ADDI)
         execute_err(decoded_opcode);
 
-    vm->I += decoded_opcode->vx;
+    vm->I += vm->V[decoded_opcode->vx];
 }
 
 void execute_font(
@@ -430,10 +430,10 @@ void execute_sub_rr(
         execute_err(decoded_opcode);
 
     vm->V[0xF] = (
-        vm->V[decoded_opcode->vx] < 
+        vm->V[decoded_opcode->vx] > 
         vm->V[decoded_opcode->vy]
     );
-    vm->V[decoded_opcode->vx] -= vm->V[decoded_opcode->vy];
+    vm->V[decoded_opcode->vx] = vm->V[decoded_opcode->vx] - vm->V[decoded_opcode->vy];
 }
 
 void execute_rsb(
@@ -447,9 +447,9 @@ void execute_rsb(
         execute_err(decoded_opcode);
 
     vm->V[0xF] = (
-        vm->V[decoded_opcode->vx] > 
-        vm->V[decoded_opcode->vy]
-    ) ? 1 : 0;
+        vm->V[decoded_opcode->vy] > 
+        vm->V[decoded_opcode->vx]
+    );
     vm->V[decoded_opcode->vx] = vm->V[decoded_opcode->vy] - vm->V[decoded_opcode->vx];
 }
 
@@ -476,7 +476,7 @@ void execute_ssound(
     if (decoded_opcode->optype != SSOUND)
         execute_err(decoded_opcode);
 
-    vm->sound_timer = decoded_opcode->vx;
+    vm->sound_timer = vm->V[decoded_opcode->vx];
 }
 
 void execute_gdelay(

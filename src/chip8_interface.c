@@ -309,6 +309,8 @@ static void chip8_draw_memory_area(
 int chip8_press_key(
     Chip8VM* vm
 ){
+    
+    
     if (IsKeyPressed(KEY_KP_1)){
         vm->keys[0] = 1;
         return 1;

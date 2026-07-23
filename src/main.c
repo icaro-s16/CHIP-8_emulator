@@ -28,7 +28,7 @@ int main(
     }
 
     chip8_emulator_run(
-        "/home/icaro_s/projects/C_family/CHIP-8_emulator/assets/roms/2-ibm-logo.ch8", 
+        "/home/icaro_s/projects/C_family/CHIP-8_emulator/assets/roms/test_opcode.ch8", 
         op_per_sec
     );
 
